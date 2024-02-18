@@ -1,0 +1,215 @@
+[nastya@oraclelinuxlab ~]$ lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda           8:0    0   21G  0 disk 
+├─sda1        8:1    0  600M  0 part /boot/efi
+├─sda2        8:2    0    1G  0 part /boot
+└─sda3        8:3    0 19.4G  0 part 
+  └─ol-root 252:0    0 19.4G  0 lvm  /
+sdb           8:16   0   21G  0 disk 
+sdc           8:32   0   21G  0 disk 
+sdd           8:48   0   21G  0 disk 
+sde           8:64   0   21G  0 disk 
+sr0          11:0    1 1024M  0 rom  
+[nastya@oraclelinuxlab ~]$ sudo parted /dev/sdb
+GNU Parted 3.5
+Using /dev/sdb
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+(parted) help                                                             
+  align-check TYPE N                       check partition N for
+        TYPE(min|opt) alignment
+  help [COMMAND]                           print general help, or help
+        on COMMAND
+  mklabel,mktable LABEL-TYPE               create a new disklabel
+        (partition table)
+  mkpart PART-TYPE [FS-TYPE] START END     make a partition
+  name NUMBER NAME                         name partition NUMBER as NAME
+  print [devices|free|list,all]            display the partition table,
+        or available devices, or free space, or all found partitions
+  quit                                     exit program
+  rescue START END                         rescue a lost partition near
+        START and END
+  resizepart NUMBER END                    resize partition NUMBER
+  rm NUMBER                                delete partition NUMBER
+  select DEVICE                            choose the device to edit
+  disk_set FLAG STATE                      change the FLAG on selected
+        device
+  disk_toggle [FLAG]                       toggle the state of FLAG on
+        selected device
+  set NUMBER FLAG STATE                    change the FLAG on partition
+        NUMBER
+  toggle [NUMBER [FLAG]]                   toggle the state of FLAG on
+        partition NUMBER
+  type NUMBER TYPE-ID or TYPE-UUID         type set TYPE-ID or TYPE-UUID
+        of partition NUMBER
+  unit UNIT                                set the default unit to UNIT
+  version                                  display the version number
+        and copyright information of GNU Parted
+(parted) mkpart                                                           
+Error: /dev/sdb: unrecognised disk label
+(parted) mklabel 
+New disk label type? gpt                                                  
+(parted) mkpart                                                          
+Partition name?  []? /dev/sdb                                             
+File system type?  [ext2]? linux-swap                                     
+Start? 0%                                                                 
+End? 100%                                                                 
+(parted) q                                                                
+Information: You may need to update /etc/fstab.
+
+[nastya@oraclelinuxlab ~]$ sudo mkswap /dev/sdb
+/dev/sdb   /dev/sdb1  
+[nastya@oraclelinuxlab ~]$ sudo mkswap /dev/sdb1
+mkswap: /dev/sdb1: warning: wiping old xfs signature.
+Setting up swapspace version 1, size = 21 GiB (22546477056 bytes)
+no label, UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e
+[nastya@oraclelinuxlab ~]$ sudo swapon -a
+[nastya@oraclelinuxlab ~]$ sudo blkid /dev/sdb1
+/dev/sdb1: UUID="dcaf3f28-45e1-47d9-94cf-81ddd34ad38e" TYPE="swap" PARTLABEL="/dev/sdb" PARTUUID="27faf7d9-586f-445f-acfe-1ac3726cfc1a"
+[nastya@oraclelinuxlab ~]$ sudo vim /etc/fstab 
+[nastya@oraclelinuxlab ~]$ cat /etc/fstab 
+
+#
+# /etc/fstab
+# Created by anaconda on Tue Feb  6 11:15:23 2024
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/ol-root     /                       xfs     defaults        0 0
+UUID=c5eb46f9-c8e6-46bb-a831-c9789c9be486 /boot                   xfs     defaults        0 0
+UUID=4C5B-7AC8          /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e	none	swap	defaults	0	0
+
+[nastya@oraclelinuxlab ~]$ sudo reboot
+
+[nastya@oraclelinuxlab ~]$ cat /proc/swaps 
+Filename				Type		Size		Used		Priority
+/dev/sdb1                               partition	22018044	12884		-2
+
+
+
+
+
+[nastya@oraclelinuxlab ~]$ lsblk 
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda           8:0    0   21G  0 disk 
+├─sda1        8:1    0  600M  0 part /boot/efi
+├─sda2        8:2    0    1G  0 part /boot
+└─sda3        8:3    0 19.4G  0 part 
+  └─ol-root 252:0    0 19.4G  0 lvm  /
+sdb           8:16   0   21G  0 disk 
+└─sdb1        8:17   0   21G  0 part [SWAP]
+sdc           8:32   0   21G  0 disk 
+sdd           8:48   0   21G  0 disk 
+sde           8:64   0   21G  0 disk 
+sr0          11:0    1 1024M  0 rom  
+[nastya@oraclelinuxlab ~]$ sudo parted /dev/sdc
+GNU Parted 3.5
+Using /dev/sdc
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+(parted) mklabel 
+New disk label type? gpt                                                  
+(parted) mkpart 
+Partition name?  []? 1                                                    
+File system type?  [ext2]? xfs                                            
+Start? 0%                                                                 
+End? 100%                                                                 
+(parted) q                                                                
+Information: You may need to update /etc/fstab.
+
+[nastya@oraclelinuxlab ~]$ lsblk                                          
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda           8:0    0   21G  0 disk 
+├─sda1        8:1    0  600M  0 part /boot/efi
+├─sda2        8:2    0    1G  0 part /boot
+└─sda3        8:3    0 19.4G  0 part 
+  └─ol-root 252:0    0 19.4G  0 lvm  /
+sdb           8:16   0   21G  0 disk 
+└─sdb1        8:17   0   21G  0 part [SWAP]
+sdc           8:32   0   21G  0 disk 
+└─sdc1        8:33   0   21G  0 part 
+sdd           8:48   0   21G  0 disk 
+sde           8:64   0   21G  0 disk 
+sr0          11:0    1 1024M  0 rom  
+[nastya@oraclelinuxlab ~]$ sudo mkfs.xfs /dev/sdc1
+meta-data=/dev/sdc1              isize=512    agcount=4, agsize=1376128 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=5504512, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+[nastya@oraclelinuxlab ~]$ sudo mount /dev/sdc1 /mnt
+[nastya@oraclelinuxlab ~]$ df -Th
+Filesystem          Type      Size  Used Avail Use% Mounted on
+devtmpfs            devtmpfs  4.0M     0  4.0M   0% /dev
+tmpfs               tmpfs     742M     0  742M   0% /dev/shm
+tmpfs               tmpfs     297M  7.5M  290M   3% /run
+/dev/mapper/ol-root xfs        20G  5.6G   14G  29% /
+/dev/sda2           xfs       960M  289M  672M  31% /boot
+/dev/sda1           vfat      599M  6.2M  593M   2% /boot/efi
+tmpfs               tmpfs     149M  100K  149M   1% /run/user/1000
+/dev/sdc1           xfs        21G  182M   21G   1% /mnt
+
+[nastya@oraclelinuxlab ~]$ sudo blkid /dev/sdc1
+/dev/sdc1: UUID="9cc14dd8-0ba0-4d70-8895-af94660603c1" TYPE="xfs" PARTLABEL="1" PARTUUID="75ea66f5-c8f1-43ae-bfb6-618ca2a723ba"
+[nastya@oraclelinuxlab ~]$ sudo vim /etc/fstab 
+[nastya@oraclelinuxlab ~]$ cat /etc/fstab 
+
+#
+# /etc/fstab
+# Created by anaconda on Tue Feb  6 11:15:23 2024
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/ol-root    			  /             xfs     defaults        		0	 0
+UUID=c5eb46f9-c8e6-46bb-a831-c9789c9be486 /boot         xfs     defaults       			0	 0
+UUID=4C5B-7AC8         			  /boot/efi     vfat    umask=0077,shortname=winnt 	0 	 2
+UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e none		swap	defaults			0	 0
+UUID=9cc14dd8-0ba0-4d70-8895-af94660603c1 /mnt		xfs	defaults			0	 0
+
+
+
+[nastya@oraclelinuxlab ~]$ df -Th | grep tmpfs
+devtmpfs            devtmpfs  4.0M     0  4.0M   0% /dev
+tmpfs               tmpfs     742M     0  742M   0% /dev/shm
+tmpfs               tmpfs     297M  7.5M  290M   3% /run
+tmpfs               tmpfs     149M  100K  149M   1% /run/user/1000
+[nastya@oraclelinuxlab ~]$ vim /etc/fstab 
+[nastya@oraclelinuxlab ~]$ sudo vim /etc/fstab 
+[nastya@oraclelinuxlab ~]$ cat /etc/fstab 
+
+#
+# /etc/fstab
+# Created by anaconda on Tue Feb  6 11:15:23 2024
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
+#
+# After editing this file, run 'systemctl daemon-reload' to update systemd
+# units generated from this file.
+#
+/dev/mapper/ol-root    			  /             xfs     defaults        0	 0
+UUID=c5eb46f9-c8e6-46bb-a831-c9789c9be486 /boot         xfs     defaults       0 0
+UUID=4C5B-7AC8         			  /boot/efi     vfat    umask=0077,shortname=winnt 	0 	 2
+UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e none		swap	defaults	0 0
+UUID=9cc14dd8-0ba0-4d70-8895-af94660603c1 /mnt		xfs	defaults	0 0
+tmpfs                                     /run          tmpfs   defaults,size=350M              0        0
+
+[nastya@oraclelinuxlab ~]$ sudo reboot
+[nastya@oraclelinuxlab ~]$ df -Th | grep tmpfs
+devtmpfs            devtmpfs  4.0M     0  4.0M   0% /dev
+tmpfs               tmpfs     742M     0  742M   0% /dev/shm
+tmpfs               tmpfs     350M  8.1M  342M   3% /run
+tmpfs               tmpfs     149M   96K  149M   1% /run/user/1000
+
