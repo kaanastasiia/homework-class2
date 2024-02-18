@@ -1,3 +1,5 @@
+#Машина на OracleLinux 9 создана в VirtualBox, в VirtualBox к ней подключены 3 дополнительных диска
+
 [nastya@oraclelinuxlab ~]$ lsblk
 NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 sda           8:0    0   21G  0 disk 
@@ -10,6 +12,8 @@ sdc           8:32   0   21G  0 disk
 sdd           8:48   0   21G  0 disk 
 sde           8:64   0   21G  0 disk 
 sr0          11:0    1 1024M  0 rom  
+
+#Первая часть задания - разметить весь диск для swap
 [nastya@oraclelinuxlab ~]$ sudo parted /dev/sdb
 GNU Parted 3.5
 Using /dev/sdb
@@ -65,6 +69,8 @@ no label, UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e
 [nastya@oraclelinuxlab ~]$ sudo swapon -a
 [nastya@oraclelinuxlab ~]$ sudo blkid /dev/sdb1
 /dev/sdb1: UUID="dcaf3f28-45e1-47d9-94cf-81ddd34ad38e" TYPE="swap" PARTLABEL="/dev/sdb" PARTUUID="27faf7d9-586f-445f-acfe-1ac3726cfc1a"
+
+#вносим swap в /etc/fstab
 [nastya@oraclelinuxlab ~]$ sudo vim /etc/fstab 
 [nastya@oraclelinuxlab ~]$ cat /etc/fstab 
 
@@ -83,8 +89,8 @@ UUID=c5eb46f9-c8e6-46bb-a831-c9789c9be486 /boot                   xfs     defaul
 UUID=4C5B-7AC8          /boot/efi               vfat    umask=0077,shortname=winnt 0 2
 UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e	none	swap	defaults	0	0
 
+#рестартуем машину и проверяем, что swap подключен
 [nastya@oraclelinuxlab ~]$ sudo reboot
-
 [nastya@oraclelinuxlab ~]$ cat /proc/swaps 
 Filename				Type		Size		Used		Priority
 /dev/sdb1                               partition	22018044	12884		-2
@@ -92,7 +98,7 @@ Filename				Type		Size		Used		Priority
 
 
 
-
+#вторая часть задания - разметить диск под xfs + сразу добавляем в /etc/fstab
 [nastya@oraclelinuxlab ~]$ lsblk 
 NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 sda           8:0    0   21G  0 disk 
@@ -180,6 +186,9 @@ UUID=9cc14dd8-0ba0-4d70-8895-af94660603c1 /mnt		xfs	defaults			0	 0
 
 
 
+#третья часть задания - подключить раздел tmps размером в четверь RAM. 
+#на данной машине RAM - 1.4GB, соотвественно, tmpfs должна быть размером 350MB
+#так как на машине уже присутсвуют несколько tmpfs было решено расширить размер tmpfs, смонтированной в каталог /run
 [nastya@oraclelinuxlab ~]$ df -Th | grep tmpfs
 devtmpfs            devtmpfs  4.0M     0  4.0M   0% /dev
 tmpfs               tmpfs     742M     0  742M   0% /dev/shm
@@ -205,7 +214,6 @@ UUID=4C5B-7AC8         			  /boot/efi     vfat    umask=0077,shortname=winnt 	0 
 UUID=dcaf3f28-45e1-47d9-94cf-81ddd34ad38e none		swap	defaults	0 0
 UUID=9cc14dd8-0ba0-4d70-8895-af94660603c1 /mnt		xfs	defaults	0 0
 tmpfs                                     /run          tmpfs   defaults,size=350M              0        0
-
 [nastya@oraclelinuxlab ~]$ sudo reboot
 [nastya@oraclelinuxlab ~]$ df -Th | grep tmpfs
 devtmpfs            devtmpfs  4.0M     0  4.0M   0% /dev
