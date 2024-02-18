@@ -1,0 +1,18 @@
+[nastya@oraclelinuxlab ~]$ uname -r
+5.15.0-200.131.27.el9uek.x86_64
+[nastya@oraclelinuxlab ~]$ sudo dnf update -y
+[nastya@oraclelinuxlab ~]$ sudo dnf install grubby
+Last metadata expiration check: 2:14:13 ago on Sun 18 Feb 2024 03:37:34 PM MSK.
+Package grubby-8.40-63.0.1.el9.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+[nastya@oraclelinuxlab ~]$ sudo grubby --default-kernel
+/boot/vmlinuz-5.15.0-203.146.5.1.el9uek.x86_64
+[nastya@oraclelinuxlab ~]$ uname -r
+5.15.0-200.131.27.el9uek.x86_64
+[nastya@oraclelinuxlab ~]$ sudo reboot
+
+[nastya@oraclelinuxlab ~]$ uname -r
+5.15.0-203.146.5.1.el9uek.x86_64
+
